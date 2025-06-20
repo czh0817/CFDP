@@ -23,14 +23,19 @@ class CrossDomainFusion(nn.Module):
     def forward(self, src_feat, tgt_feat):
         src_feat = src_feat.unsqueeze(1)
         tgt_feat = tgt_feat.unsqueeze(1)
+
         src_attn, _ = self.cross_att(src_feat, tgt_feat, tgt_feat)
         tgt_attn, _ = self.cross_att(tgt_feat, src_feat, src_feat)
+
         src_feat = src_feat + src_attn
         tgt_feat = tgt_feat + tgt_attn
+
         src_gate = self.gate(src_feat.squeeze(1)) + 1
         tgt_gate = self.gate(tgt_feat.squeeze(1)) + 1
+
         src_out = self.norm(src_feat.squeeze(1) + src_gate * src_attn.squeeze(1))
         tgt_out = self.norm(tgt_feat.squeeze(1) + tgt_gate * tgt_attn.squeeze(1))
+
         src_out = src_out + self.feed_forward(src_out)
         tgt_out = tgt_out + self.feed_forward(tgt_out)
 
